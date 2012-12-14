@@ -10,10 +10,10 @@ import os.path
 
 simple = os.environ.get('MWS_MERCHANT', None)
 if not simple:
-    print """
+    print("""
         Please set the MWS_MERCHANT environmental variable
         to your Merchant or SellerId to enable MWS tests.
-    """
+    """)
 
 
 advanced = False
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     sys.path = [devpath] + sys.path
     advanced = simple and True or False
     if advanced:
-        print '>>> advanced MWS tests; using local boto sources'
+        print('>>> advanced MWS tests; using local boto sources')
 
 from boto.mws.connection import MWSConnection
 

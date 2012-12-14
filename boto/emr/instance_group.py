@@ -27,7 +27,7 @@ class InstanceGroup(object):
         self.market = market
         self.name = name
         if market == 'SPOT':
-            if not isinstance(bidprice, basestring):
+            if not isinstance(bidprice, str):
                 raise ValueError('bidprice must be specified if market == SPOT')
             self.bidprice = bidprice
 

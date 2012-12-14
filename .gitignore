@@ -11,3 +11,5 @@ MANIFEST
 .tox
 .coverage
 *flymake.py
+.project
+.pydevproject

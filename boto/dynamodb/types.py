@@ -28,13 +28,13 @@ import base64
 
 
 def is_num(n):
-    types = (int, long, float, bool)
+    types = (int, int, float, bool)
     return isinstance(n, types) or n in types
 
 
 def is_str(n):
-    return isinstance(n, basestring) or (isinstance(n, type) and
-                                         issubclass(n, basestring))
+    return isinstance(n, str) or (isinstance(n, type) and
+                                         issubclass(n, str))
 
 
 def is_binary(n):
@@ -65,11 +65,11 @@ def get_dynamodb_type(val):
     elif is_str(val):
         dynamodb_type = 'S'
     elif isinstance(val, (set, frozenset)):
-        if False not in map(is_num, val):
+        if False not in list(map(is_num, val)):
             dynamodb_type = 'NS'
-        elif False not in map(is_str, val):
+        elif False not in list(map(is_str, val)):
             dynamodb_type = 'SS'
-        elif False not in map(is_binary, val):
+        elif False not in list(map(is_binary, val)):
             dynamodb_type = 'BS'
     elif isinstance(val, Binary):
         dynamodb_type = 'B'
@@ -144,7 +144,7 @@ def item_object_hook(dct):
     This hook will transform Amazon DynamoDB JSON responses to something
     that maps directly to native Python types.
     """
-    if len(dct.keys()) > 1:
+    if len(list(dct.keys())) > 1:
         return dct
     if 'S' in dct:
         return dct['S']

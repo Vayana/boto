@@ -124,19 +124,19 @@ class Query(object):
             params['facet'] = ','.join(self.facet)
 
         if self.facet_constraints:
-            for k, v in self.facet_constraints.iteritems():
+            for k, v in self.facet_constraints.items():
                 params['facet-%s-constraints' % k] = v
 
         if self.facet_sort:
-            for k, v in self.facet_sort.iteritems():
+            for k, v in self.facet_sort.items():
                 params['facet-%s-sort' % k] = v
 
         if self.facet_top_n:
-            for k, v in self.facet_top_n.iteritems():
+            for k, v in self.facet_top_n.items():
                 params['facet-%s-top-n' % k] = v
 
         if self.t:
-            for k, v in self.t.iteritems():
+            for k, v in self.t.items():
                 params['t-%s' % k] = v
         return params
 

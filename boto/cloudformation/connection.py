@@ -133,7 +133,7 @@ class CloudFormationConnection(AWSQueryConnection):
             for i, value in enumerate(capabilities):
                 params['Capabilities.member.%d' % (i + 1)] = value
         if tags:
-            for i, (key, value) in enumerate(tags.items()):
+            for i, (key, value) in enumerate(list(tags.items())):
                 params['Tags.member.%d.Key' % (i + 1)] = key
                 params['Tags.member.%d.Value' % (i + 1)] = value
         if len(notification_arns) > 0:

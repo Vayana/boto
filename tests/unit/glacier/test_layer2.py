@@ -31,7 +31,7 @@ import boto.glacier.vault
 from boto.glacier.vault import Vault
 from boto.glacier.vault import Job
 
-from StringIO import StringIO
+from io import StringIO
 
 # Some fixture data from the Glacier docs
 FIXTURE_VAULT = {

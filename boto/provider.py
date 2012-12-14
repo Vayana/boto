@@ -266,7 +266,7 @@ class Provider(object):
         metadata = get_instance_metadata(timeout=timeout, num_retries=1)
         # I'm assuming there's only one role on the instance profile.
         if metadata and 'iam' in metadata:
-            security = metadata['iam']['security-credentials'].values()[0]
+            security = list(metadata['iam']['security-credentials'].values())[0]
             self._access_key = security['AccessKeyId']
             self._secret_key = self._convert_key_to_str(security['SecretAccessKey'])
             self._security_token = security['Token']
@@ -277,7 +277,7 @@ class Provider(object):
                            self._credential_expiry_time - datetime.now(), expires_at)
 
     def _convert_key_to_str(self, key):
-        if isinstance(key, unicode):
+        if isinstance(key, str):
             # the secret key must be bytes and not unicode to work
             #  properly with hmac.new (see http://bugs.python.org/issue5285)
             return str(key)
