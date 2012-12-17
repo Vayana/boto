@@ -490,9 +490,9 @@ class AWSAuthConnection(object):
         self.handle_proxy(proxy, proxy_port, proxy_user, proxy_pass)
         # define exceptions from httplib that we want to catch and retry
         self.http_exceptions = (http.client.HTTPException, socket.error,
-                                http.client.BadStatusLine)
+                                socket.gaierror, http.client.BadStatusLine)
         # define subclasses of the above that are not retryable.
-        self.http_unretryable_exceptions = [socket.gaierror]
+        self.http_unretryable_exceptions = []
         if HAVE_HTTPS_CONNECTION:
             self.http_unretryable_exceptions.append(
                     https_connection.InvalidCertificateException)
