@@ -312,8 +312,6 @@ class Bucket(object):
             k = k.replace('_', '-')
             if  k == 'maxkeys':
                 k = 'max-keys'
-            if isinstance(v, str):
-                v = v.encode('utf-8')
             if v is not None and v != '':
                 l.append('%s=%s' % (urllib.parse.quote(k), urllib.parse.quote(str(v))))
         if len(l):
@@ -1159,7 +1157,7 @@ class Bucket(object):
         :param lifecycle_config: The lifecycle configuration you want
             to configure for this bucket.
         """
-        fp = io.StringIO(lifecycle_config.to_xml())
+        fp = io.BytesIO(lifecycle_config.to_xml().encode("utf-8"))
         md5 = boto.utils.compute_md5(fp)
         if headers is None:
             headers = {}
@@ -1586,7 +1584,7 @@ class Bucket(object):
     def set_xml_tags(self, tag_str, headers=None, query_args='tagging'):
         if headers is None:
             headers = {}
-        md5 = boto.utils.compute_md5(io.StringIO(tag_str))
+        md5 = boto.utils.compute_md5(io.BytesIO(tag_str.encode("utf-8")))
         headers['Content-MD5'] = md5[1]
         headers['Content-Type'] = 'text/xml'
         response = self.connection.make_request('PUT', self.name,

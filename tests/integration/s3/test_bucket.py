@@ -74,6 +74,7 @@ class S3BucketTest (unittest.TestCase):
         rs = self.bucket.get_all_keys(max_keys=2, delimiter="/")
         for element in rs:
             pass
+        print(rs.next_marker)
         self.assertEqual(element.name, "a/")
         self.assertEqual(rs.next_marker, "b")
 
@@ -160,7 +161,7 @@ class S3BucketTest (unittest.TestCase):
                                   {'IndexDocument': {'Suffix': 'index.html'}}})
         config2, xml = self.bucket.get_website_configuration_with_xml()
         self.assertEqual(config, config2)
-        self.assertTrue('<Suffix>index.html</Suffix>' in xml, xml)
+        self.assertTrue('<Suffix>index.html</Suffix>' in xml.decode("utf-8"), xml)
 
     def test_lifecycle(self):
         lifecycle = Lifecycle()

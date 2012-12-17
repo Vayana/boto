@@ -227,7 +227,7 @@ class Vault(object):
         for part_desc in part_list_response['Parts']:
             part_index = self._range_string_to_part_index(
                 part_desc['RangeInBytes'], part_size)
-            part_tree_hash = part_desc['SHA256TreeHash'].decode('hex')
+            part_tree_hash = part_desc['SHA256TreeHash']
             part_hash_map[part_index] = part_tree_hash
 
         if not file_obj:

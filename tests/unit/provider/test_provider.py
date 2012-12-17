@@ -113,7 +113,7 @@ class TestProvider(unittest.TestCase):
             'Code': 'Success',
             'Expiration': first_expiration,
             'LastUpdated': '2012-08-31T21:43:40Z',
-            'SecretAccessKey': 'first_secret_key',
+            'SecretAccessKey': b'first_secret_key',
             'Token': 'first_token',
             'Type': 'AWS-HMAC'
         }
@@ -127,7 +127,7 @@ class TestProvider(unittest.TestCase):
         self.get_instance_metadata.return_value = instance_config
         p = provider.Provider('aws')
         self.assertEqual(p.access_key, 'first_access_key')
-        self.assertEqual(p.secret_key, 'first_secret_key')
+        self.assertEqual(p.secret_key, b'first_secret_key')
         self.assertEqual(p.security_token, 'first_token')
         self.assertIsNotNone(p._credential_expiry_time)
 
@@ -135,13 +135,13 @@ class TestProvider(unittest.TestCase):
         expired = now - timedelta(seconds=20)
         p._credential_expiry_time = expired
         credentials['AccessKeyId'] = 'second_access_key'
-        credentials['SecretAccessKey'] = 'second_secret_key'
+        credentials['SecretAccessKey'] = b'second_secret_key'
         credentials['Token'] = 'second_token'
         self.get_instance_metadata.return_value = instance_config
 
         # Now upon attribute access, the credentials should be updated.
         self.assertEqual(p.access_key, 'second_access_key')
-        self.assertEqual(p.secret_key, 'second_secret_key')
+        self.assertEqual(p.secret_key, b'second_secret_key')
         self.assertEqual(p.security_token, 'second_token')
 
 

@@ -30,6 +30,7 @@ from boto.glacier.layer2 import Layer2
 import boto.glacier.vault
 from boto.glacier.vault import Vault
 from boto.glacier.vault import Job
+import binascii
 
 from io import StringIO
 
@@ -131,7 +132,7 @@ class TestGlacierLayer2Connection(GlacierLayer2Base):
         self.mock_layer1.describe_vault.return_value = FIXTURE_VAULT
         vault = self.layer2.get_vault("examplevault")
         self.assertEqual(vault.layer1, self.mock_layer1)
-        self.assertEqual(vault.name, "examplevault")
+        self.assertEqual(vault.name, b"examplevault")
         self.assertEqual(vault.size, 78088912)
         self.assertEqual(vault.number_of_archives, 192)
 
@@ -153,13 +154,13 @@ class TestVault(GlacierLayer2Base):
             "UploadId": "UPLOADID"}
         writer = self.vault.create_archive_writer(description="stuff")
         self.mock_layer1.initiate_multipart_upload.assert_called_with(
-            "examplevault", self.vault.DefaultPartSize, "stuff")
+            b"examplevault", self.vault.DefaultPartSize, "stuff")
         self.assertEqual(writer.vault, self.vault)
         self.assertEqual(writer.upload_id, "UPLOADID")
 
     def test_delete_vault(self):
         self.vault.delete_archive("archive")
-        self.mock_layer1.delete_archive.assert_called_with("examplevault",
+        self.mock_layer1.delete_archive.assert_called_with(b"examplevault",
                                                            "archive")
 
     def test_get_job(self):
@@ -174,7 +175,7 @@ class TestVault(GlacierLayer2Base):
         self.mock_layer1.list_jobs.return_value = {
             "JobList": [FIXTURE_ARCHIVE_JOB]}
         jobs = self.vault.list_jobs(False, "InProgress")
-        self.mock_layer1.list_jobs.assert_called_with("examplevault",
+        self.mock_layer1.list_jobs.assert_called_with(b"examplevault",
                                                       False, "InProgress")
         self.assertEqual(jobs[0].archive_id,
                          "NkbByEejwEggmBz2fTHgJrg0XBoDfjP4q6iu87-TjhqG6eGoOY9Z"
@@ -185,7 +186,7 @@ class TestVault(GlacierLayer2Base):
         self.mock_layer1.list_parts.return_value = (
             dict(EXAMPLE_PART_LIST_COMPLETE)) # take a copy
         parts_result = self.vault.list_all_parts(sentinel.upload_id)
-        expected = [call('examplevault', sentinel.upload_id)]
+        expected = [call(b'examplevault', sentinel.upload_id)]
         self.assertEquals(expected, self.mock_layer1.list_parts.call_args_list)
         self.assertEquals(EXAMPLE_PART_LIST_COMPLETE, parts_result)
 
@@ -196,8 +197,8 @@ class TestVault(GlacierLayer2Base):
             dict(EXAMPLE_PART_LIST_RESULT_PAGE_2)
         ]
         parts_result = self.vault.list_all_parts(sentinel.upload_id)
-        expected = [call('examplevault', sentinel.upload_id),
-                    call('examplevault', sentinel.upload_id,
+        expected = [call(b'examplevault', sentinel.upload_id),
+                    call(b'examplevault', sentinel.upload_id,
                          marker=EXAMPLE_PART_LIST_RESULT_PAGE_1['Marker'])]
         self.assertEquals(expected, self.mock_layer1.list_parts.call_args_list)
         self.assertEquals(EXAMPLE_PART_LIST_COMPLETE, parts_result)
@@ -222,7 +223,7 @@ class TestVault(GlacierLayer2Base):
             sentinel.upload_id, file_obj=sentinel.file_obj)
         mock_resume_file_upload.assert_called_once_with(
             self.vault, sentinel.upload_id, part_size, sentinel.file_obj,
-            {0: '12'.decode('hex'), 1: '34'.decode('hex')})
+            {0: binascii.hexlify(bytes.fromhex('12')).decode("utf-8"), 1: binascii.hexlify(bytes.fromhex('34')).decode("utf-8")})
 
 
 class TestJob(GlacierLayer2Base):
@@ -235,7 +236,7 @@ class TestJob(GlacierLayer2Base):
         self.mock_layer1.get_job_output.return_value = "TEST_OUTPUT"
         self.job.get_output((0,100))
         self.mock_layer1.get_job_output.assert_called_with(
-            "examplevault",
+            b"examplevault",
             "HkF9p6o7yjhFx-K3CGl6fuSm6VzW9T7esGQfco8nUXVYwS0jlb5gq1JZ55yHgt5vP"
             "54ZShjoQzQVVh7vEXAMPLEjobID", (0,100))
 

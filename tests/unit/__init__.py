@@ -21,7 +21,7 @@ class AWSMockServiceTestCase(unittest.TestCase):
         self.service_connection = self.create_service_connection(
             https_connection_factory=self.https_connection_factory,
             aws_access_key_id='aws_access_key_id',
-            aws_secret_access_key='aws_secret_access_key')
+            aws_secret_access_key=b'aws_secret_access_key')
         self.initialize_service_connection()
 
     def initialize_service_connection(self):

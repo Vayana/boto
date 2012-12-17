@@ -249,7 +249,7 @@ class Provider(object):
             self.secret_key = os.environ[secret_key_name.upper()]
             boto.log.debug("Using secret key found in environment variable.")
         elif config.has_option('Credentials', secret_key_name):
-            self.secret_key = config.get('Credentials', secret_key_name)
+            self.secret_key = config.get('Credentials', secret_key_name).encode("utf-8")
             boto.log.debug("Using secret key found in config file.")
 
         if ((self._access_key is None or self._secret_key is None) and
