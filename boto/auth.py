@@ -106,6 +106,8 @@ class HmacKeys(object):
 
     def sign_string(self, string_to_sign):
         new_hmac = self._get_hmac()
+        if isinstance(string_to_sign,str) :
+            string_to_sign = string_to_sign.encode("utf-8")
         new_hmac.update(string_to_sign)
         return base64.encodestring(new_hmac.digest()).strip()
 

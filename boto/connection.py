@@ -371,7 +371,7 @@ class HTTPRequest(object):
         for key in self.headers:
             val = self.headers[key]
             if isinstance(val, str):
-                self.headers[key] = urllib.parse.quote_plus(val.encode('utf-8'))
+                self.headers[key] = urllib.parse.quote_plus(val.encode('utf-8'),'/')
             elif isinstance(val, bytes) :
                 self.headers[key] = val.decode("utf-8")
 
@@ -490,9 +490,9 @@ class AWSAuthConnection(object):
         self.handle_proxy(proxy, proxy_port, proxy_user, proxy_pass)
         # define exceptions from httplib that we want to catch and retry
         self.http_exceptions = (http.client.HTTPException, socket.error,
-                                socket.gaierror, http.client.BadStatusLine)
+                                http.client.BadStatusLine)
         # define subclasses of the above that are not retryable.
-        self.http_unretryable_exceptions = []
+        self.http_unretryable_exceptions = [socket.gaierror]
         if HAVE_HTTPS_CONNECTION:
             self.http_unretryable_exceptions.append(
                     https_connection.InvalidCertificateException)
@@ -816,7 +816,7 @@ class AWSAuthConnection(object):
         boto.log.debug('Host: %s' % request.host)
         response = None
         body = None
-        e = None
+        exception = None
         if override_num_retries is None:
             num_retries = config.getint('Boto', 'num_retries', self.num_retries)
         else:
@@ -885,6 +885,7 @@ class AWSAuthConnection(object):
                                   e.__class__.__name__)
                 connection = self.new_http_connection(request.host,
                                                       self.is_secure)
+                exception = e
             time.sleep(next_sleep)
             i += 1
         # If we made it here, it's because we have exhausted our retries
@@ -893,8 +894,8 @@ class AWSAuthConnection(object):
         # Otherwise, raise the exception that must have already h#appened.
         if response:
             raise BotoServerError(response.status, response.reason, body)
-        elif e:
-            raise e
+        elif exception:
+            raise exception
         else:
             msg = 'Please report this exception as a Boto Issue!'
             raise BotoClientError(msg)

@@ -184,9 +184,9 @@ def get_aws_metadata(headers, provider=None):
     for hkey in list(headers.keys()):
         if hkey.lower().startswith(metadata_prefix):
             val = urllib.parse.unquote_plus(headers[hkey])
-            try:
-                metadata[hkey[len(metadata_prefix):]] = str(val, 'utf-8')
-            except UnicodeDecodeError:
+            if isinstance(val, bytes) :
+                metadata[hkey[len(metadata_prefix):]] = val.decode("utf-8")
+            else :
                 metadata[hkey[len(metadata_prefix):]] = val
             del headers[hkey]
     return metadata

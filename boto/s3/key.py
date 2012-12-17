@@ -1523,7 +1523,7 @@ class Key(object):
         :rtype: string
         :returns: The contents of the file as a string
         """
-        fp = io.StringIO()
+        fp = io.BytesIO()
         self.get_contents_to_file(fp, headers, cb, num_cb, torrent=torrent,
                                   version_id=version_id,
                                   response_headers=response_headers)

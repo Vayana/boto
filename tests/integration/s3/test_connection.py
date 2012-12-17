@@ -33,6 +33,7 @@ import http.client
 from boto.s3.connection import S3Connection
 from boto.s3.bucket import Bucket
 from boto.exception import S3PermissionsError, S3ResponseError
+import socket
 
 
 class S3ConnectionTest (unittest.TestCase):
@@ -67,22 +68,22 @@ class S3ConnectionTest (unittest.TestCase):
         # test generated URLs
         url = k.generate_url(3600)
         file = urllib.request.urlopen(url)
-        assert s1 == file.read(), 'invalid URL %s' % url
+        assert s1.encode("utf-8") == file.read(), 'invalid URL %s' % url
         url = k.generate_url(3600, force_http=True)
         file = urllib.request.urlopen(url)
-        assert s1 == file.read(), 'invalid URL %s' % url
+        assert s1.encode("utf-8") == file.read(), 'invalid URL %s' % url
         url = k.generate_url(3600, force_http=True, headers={'x-amz-x-token' : 'XYZ'})
         file = urllib.request.urlopen(url)
-        assert s1 == file.read(), 'invalid URL %s' % url
+        assert s1.encode("utf-8") == file.read(), 'invalid URL %s' % url
         rh = {'response-content-disposition': 'attachment; filename="foo.txt"'}
         url = k.generate_url(60, response_headers=rh)
         file = urllib.request.urlopen(url)
-        assert s1 == file.read(), 'invalid URL %s' % url
+        assert s1.encode("utf-8") == file.read(), 'invalid URL %s' % url
         #test whether amperands and to-be-escaped characters work in header filename
         rh = {'response-content-disposition': 'attachment; filename="foo&z%20ar&ar&zar&bar.txt"'}
         url = k.generate_url(60, response_headers=rh, force_http=True)
         file = urllib.request.urlopen(url)
-        assert s1 == file.read(), 'invalid URL %s' % url
+        assert s1.encode("utf-8") == file.read(), 'invalid URL %s' % url
         # overwrite foobar contents with a PUT
         url = k.generate_url(3600, 'PUT', force_http=True, policy='private', reduced_redundancy=True)
         up = urllib.parse.urlsplit(url)
@@ -90,7 +91,7 @@ class S3ConnectionTest (unittest.TestCase):
         con.request("PUT", up.path + '?' + up.query, body="hello there")
         resp = con.getresponse()
         assert 200 == resp.status
-        assert "hello there" == k.get_contents_as_string()
+        assert b"hello there" == k.get_contents_as_string()
         bucket.delete_key(k)
         # test a few variations on get_all_keys - first load some data
         # for the first one, let's override the content type
@@ -139,11 +140,13 @@ class S3ConnectionTest (unittest.TestCase):
         mdval3 = 'föö'
         mdkey3 = 'meta3'
         k.set_metadata(mdkey3, mdval3)
+        result = k.get_metadata(mdkey3)
         k.set_contents_from_string(s1)
         k = bucket.lookup('has_metadata')
         assert k.get_metadata(mdkey1) == mdval1
         assert k.get_metadata(mdkey2) == mdval2
-        assert k.get_metadata(mdkey3) == mdval3
+        result = k.get_metadata(mdkey3)
+        assert result == mdval3
         k = bucket.new_key('has_metadata')
         k.get_contents_as_string()
         assert k.get_metadata(mdkey1) == mdval1
@@ -240,6 +243,10 @@ class S3ConnectionTest (unittest.TestCase):
         try:
             c.create_bucket('bad$bucket$name')
         except S3ResponseError as e:
+            print(e.error_code)
             self.assertEqual(e.error_code, 'InvalidBucketName')
+        except socket.gaierror as ge :
+            # error in case of subdomain calling format
+            self.assertEqual(ge.strerror, "Name or service not known")
         else:
             self.fail("S3ResponseError not raised.")
