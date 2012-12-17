@@ -919,7 +919,7 @@ def compute_hash(fp, buf_size=8192, size=None, hash_algorithm=md5):
             s = fp.read(buf_size)
     hex_digest = hash_obj.hexdigest()
     base64_digest = base64.encodestring(hash_obj.digest())
-    if base64_digest[-1] == '\n':
+    if base64_digest[-1] == b'\n'[0]:
         base64_digest = base64_digest[0:-1]
     # data_size based on bytes read.
     data_size = fp.tell() - spos

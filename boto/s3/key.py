@@ -24,7 +24,7 @@
 import mimetypes
 import os
 import re
-import rfc822
+import email.utils
 import io
 import base64
 import math
@@ -1476,8 +1476,8 @@ class Key(object):
         # if last_modified date was sent from s3, try to set file's timestamp
         if self.last_modified != None:
             try:
-                modified_tuple = rfc822.parsedate_tz(self.last_modified)
-                modified_stamp = int(rfc822.mktime_tz(modified_tuple))
+                modified_tuple = email.utils.parsedate_tz(self.last_modified)
+                modified_stamp = int(email.utils.mktime_tz(modified_tuple))
                 os.utime(fp.name, (modified_stamp, modified_stamp))
             except Exception:
                 pass

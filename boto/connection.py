@@ -372,6 +372,8 @@ class HTTPRequest(object):
             val = self.headers[key]
             if isinstance(val, str):
                 self.headers[key] = urllib.parse.quote_plus(val.encode('utf-8'))
+            elif isinstance(val, bytes) :
+                self.headers[key] = val.decode("utf-8")
 
         connection._auth_handler.add_auth(self, **kwargs)
 
