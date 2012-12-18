@@ -1371,7 +1371,7 @@ class Bucket(object):
             CORS configuration.  See the S3 documentation for details
             of the exact syntax required.
         """
-        fp = io.StringIO(cors_xml)
+        fp = io.BytesIO(cors_xml)
         md5 = boto.utils.compute_md5(fp)
         if headers is None:
             headers = {}
@@ -1397,7 +1397,7 @@ class Bucket(object):
         :param cors_config: The CORS configuration you want
             to configure for this bucket.
         """
-        return self.set_cors_xml(cors_config.to_xml())
+        return self.set_cors_xml(cors_config.to_xml().encode("utf-8"))
 
     def get_cors_xml(self, headers=None):
         """
