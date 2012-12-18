@@ -539,7 +539,7 @@ class Bucket(object):
             if count <= 0:
                 return False  # no more
             data = data.encode('utf-8')
-            fp = io.StringIO(data)
+            fp = io.BytesIO(data)
             md5 = boto.utils.compute_md5(fp)
             hdrs['Content-MD5'] = md5[1]
             hdrs['Content-Type'] = 'text/xml'
