@@ -74,7 +74,7 @@ class S3EncryptionTest (unittest.TestCase):
         o = k.get_contents_as_string()
         
         # check to make sure content read from s3 is identical to original
-        assert o == s1
+        assert o == s1.encode("utf-8")
         
         # now overwrite that same key with encrypted data
         k.set_contents_from_string(s2, encrypt_key=True)
@@ -82,7 +82,7 @@ class S3EncryptionTest (unittest.TestCase):
         
         # now retrieve the contents as a string and compare
         o = k.get_contents_as_string()
-        assert o == s2
+        assert o == s2.encode("utf-8")
         
         # now set bucket policy to require encrypted objects
         bucket.set_policy(json_policy % bucket.name)
