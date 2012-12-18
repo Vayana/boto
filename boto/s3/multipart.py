@@ -293,7 +293,7 @@ class MultiPartUpload(object):
         :rtype: :class:`boto.s3.multipart.CompletedMultiPartUpload`
         :returns: An object representing the completed upload.
         """
-        xml = self.to_xml()
+        xml = self.to_xml().encode("utf-8")
         return self.bucket.complete_multipart_upload(self.key_name,
                                                      self.id, xml)
 

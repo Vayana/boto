@@ -1525,7 +1525,7 @@ class Bucket(object):
                                                 query_args=query_args,
                                                 headers=headers, data=xml_body)
         contains_error = False
-        body = response.read()
+        body = response.read().decode("utf-8")
         # Some errors will be reported in the body of the response
         # even though the HTTP response code is 200.  This check
         # does a quick and dirty peek in the body for an error element.
@@ -1535,7 +1535,7 @@ class Bucket(object):
         if response.status == 200 and not contains_error:
             resp = CompleteMultiPartUpload(self)
             h = handler.XmlHandler(resp, self)
-            xml.sax.parseString(body, h)
+            xml.sax.parseString(body.encode("utf-8"), h)
             # Use a dummy key to parse various response headers
             # for versioning, encryption info and then explicitly
             # set the completed MPU object values from key.

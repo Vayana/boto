@@ -59,7 +59,7 @@ class S3MultiPartUploadTest(unittest.TestCase):
     def test_complete_ascii(self):
         key_name = "test"
         mpu = self.bucket.initiate_multipart_upload(key_name)
-        fp = io.StringIO("small file")
+        fp = io.BytesIO("small file".encode("utf-8"))
         mpu.upload_part_from_file(fp, part_num=1)
         fp.close()
         cmpu = mpu.complete_upload()
@@ -69,7 +69,7 @@ class S3MultiPartUploadTest(unittest.TestCase):
     def test_complete_japanese(self):
         key_name = "テスト"
         mpu = self.bucket.initiate_multipart_upload(key_name)
-        fp = io.StringIO("small file")
+        fp = io.BytesIO(b"small file")
         mpu.upload_part_from_file(fp, part_num=1)
         fp.close()
         cmpu = mpu.complete_upload()
@@ -109,7 +109,7 @@ class S3MultiPartUploadTest(unittest.TestCase):
     def test_four_part_file(self):
         key_name = "k"
         contents = "01234567890123456789"
-        sfp = io.StringIO(contents)
+        sfp = io.BytesIO(contents.encode("utf-8"))
 
         # upload 20 bytes in 4 parts of 5 bytes each
         mpu = self.bucket.initiate_multipart_upload(key_name)
