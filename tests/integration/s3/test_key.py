@@ -47,8 +47,8 @@ class S3KeyTest (unittest.TestCase):
 
     def test_set_contents_from_file_dataloss(self):
         # Create an empty stringio and write to it.
-        content = "abcde"
-        sfp = io.StringIO()
+        content = b"abcde"
+        sfp = io.BytesIO()
         sfp.write(content)
         # Try set_contents_from_file() without rewinding sfp
         k = self.bucket.new_key("k")
@@ -66,18 +66,18 @@ class S3KeyTest (unittest.TestCase):
         self.assertEqual(ks, content)
 
         # finally, try with a 0 length string
-        sfp = io.StringIO()
+        sfp = io.BytesIO()
         k = self.bucket.new_key("k")
         k.set_contents_from_file(sfp)
         self.assertEqual(k.size, 0)
         # check actual contents by getting it.
         kn = self.bucket.new_key("k")
         ks = kn.get_contents_as_string()
-        self.assertEqual(ks, "")
+        self.assertEqual(ks, b"")
 
     def test_set_contents_as_file(self):
         content="01234567890123456789"
-        sfp = io.StringIO(content)
+        sfp = io.BytesIO(content.encode("utf-8"))
 
         # fp is set at 0 for just opened (for read) files.
         # set_contents should write full content to key.
@@ -86,7 +86,7 @@ class S3KeyTest (unittest.TestCase):
         self.assertEqual(k.size, 20)
         kn = self.bucket.new_key("k")
         ks = kn.get_contents_as_string()
-        self.assertEqual(ks, content)
+        self.assertEqual(ks, content.encode("utf-8"))
 
         # set fp to 5 and set contents. this should
         # set "567890123456789" to the key
@@ -96,7 +96,7 @@ class S3KeyTest (unittest.TestCase):
         self.assertEqual(k.size, 15)
         kn = self.bucket.new_key("k")
         ks = kn.get_contents_as_string()
-        self.assertEqual(ks, content[5:])
+        self.assertEqual(ks, content[5:].encode("utf-8"))
 
         # set fp to 5 and only set 5 bytes. this should
         # write the value "56789" to the key.
@@ -107,11 +107,11 @@ class S3KeyTest (unittest.TestCase):
         self.assertEqual(sfp.tell(), 10)
         kn = self.bucket.new_key("k")
         ks = kn.get_contents_as_string()
-        self.assertEqual(ks, content[5:10])
+        self.assertEqual(ks, content[5:10].encode("utf-8"))
 
     def test_set_contents_with_md5(self):
         content="01234567890123456789"
-        sfp = io.StringIO(content)
+        sfp = io.BytesIO(content.encode("utf-8"))
 
         # fp is set at 0 for just opened (for read) files.
         # set_contents should write full content to key.
@@ -120,7 +120,7 @@ class S3KeyTest (unittest.TestCase):
         k.set_contents_from_file(sfp, md5=good_md5)
         kn = self.bucket.new_key("k")
         ks = kn.get_contents_as_string()
-        self.assertEqual(ks, content)
+        self.assertEqual(ks, content.encode("utf-8"))
 
         # set fp to 5 and only set 5 bytes. this should
         # write the value "56789" to the key.
@@ -131,7 +131,7 @@ class S3KeyTest (unittest.TestCase):
         self.assertEqual(sfp.tell(), 10)
         kn = self.bucket.new_key("k")
         ks = kn.get_contents_as_string()
-        self.assertEqual(ks, content[5:10])
+        self.assertEqual(ks, content[5:10].encode("utf-8"))
 
         # let's try a wrong md5 by just altering it.
         k = self.bucket.new_key("k")
@@ -146,14 +146,14 @@ class S3KeyTest (unittest.TestCase):
 
     def test_get_contents_with_md5(self):
         content="01234567890123456789"
-        sfp = io.StringIO(content)
+        sfp = io.BytesIO(content.encode("utf-8"))
 
         k = self.bucket.new_key("k")
         k.set_contents_from_file(sfp)
         kn = self.bucket.new_key("k")
         s = kn.get_contents_as_string()
         self.assertEqual(kn.md5, k.md5)
-        self.assertEqual(s, content)
+        self.assertEqual(s, content.encode("utf-8"))
 
     def test_file_callback(self):
         def callback(wrote, total):
@@ -166,7 +166,7 @@ class S3KeyTest (unittest.TestCase):
         self.my_cb_last = None
         k = self.bucket.new_key("k")
         k.BufferSize = 2
-        sfp = io.StringIO("")
+        sfp = io.BytesIO(b"")
         k.set_contents_from_file(sfp, cb=callback, num_cb=10)
         self.assertEqual(self.my_cb_cnt, 1)
         self.assertEqual(self.my_cb_last, 0)
@@ -180,7 +180,7 @@ class S3KeyTest (unittest.TestCase):
         self.assertEqual(self.my_cb_last, 0)
 
         content="01234567890123456789"
-        sfp = io.StringIO(content)
+        sfp = io.BytesIO(content.encode("utf-8"))
 
         # expect 2 calls due start/finish
         self.my_cb_cnt = 0
@@ -196,7 +196,7 @@ class S3KeyTest (unittest.TestCase):
         s = k.get_contents_as_string(cb=callback)
         self.assertEqual(self.my_cb_cnt, 2)
         self.assertEqual(self.my_cb_last, 20)
-        self.assertEqual(s, content)
+        self.assertEqual(s, content.encode("utf-8"))
 
         # rewind sfp and try upload again. -1 should call
         # for every read/write so that should make 11 when bs=2
@@ -215,7 +215,7 @@ class S3KeyTest (unittest.TestCase):
         s = k.get_contents_as_string(cb=callback, num_cb=-1)
         self.assertEqual(self.my_cb_cnt, 11)
         self.assertEqual(self.my_cb_last, 20)
-        self.assertEqual(s, content)
+        self.assertEqual(s, content.encode("utf-8"))
 
         # no more than 1 times => 2 times
         # last time always 20 bytes
@@ -234,7 +234,7 @@ class S3KeyTest (unittest.TestCase):
         s = k.get_contents_as_string(cb=callback, num_cb=1)
         self.assertTrue(self.my_cb_cnt <= 2)
         self.assertEqual(self.my_cb_last, 20)
-        self.assertEqual(s, content)
+        self.assertEqual(s, content.encode("utf-8"))
 
         # no more than 2 times
         # last time always 20 bytes
@@ -253,7 +253,7 @@ class S3KeyTest (unittest.TestCase):
         s = k.get_contents_as_string(cb=callback, num_cb=2)
         self.assertTrue(self.my_cb_cnt <= 2)
         self.assertEqual(self.my_cb_last, 20)
-        self.assertEqual(s, content)
+        self.assertEqual(s, content.encode("utf-8"))
 
         # no more than 3 times
         # last time always 20 bytes
@@ -272,7 +272,7 @@ class S3KeyTest (unittest.TestCase):
         s = k.get_contents_as_string(cb=callback, num_cb=3)
         self.assertTrue(self.my_cb_cnt <= 3)
         self.assertEqual(self.my_cb_last, 20)
-        self.assertEqual(s, content)
+        self.assertEqual(s, content.encode("utf-8"))
 
         # no more than 4 times
         # last time always 20 bytes
@@ -291,7 +291,7 @@ class S3KeyTest (unittest.TestCase):
         s = k.get_contents_as_string(cb=callback, num_cb=4)
         self.assertTrue(self.my_cb_cnt <= 4)
         self.assertEqual(self.my_cb_last, 20)
-        self.assertEqual(s, content)
+        self.assertEqual(s, content.encode("utf-8"))
 
         # no more than 6 times
         # last time always 20 bytes
@@ -310,7 +310,7 @@ class S3KeyTest (unittest.TestCase):
         s = k.get_contents_as_string(cb=callback, num_cb=6)
         self.assertTrue(self.my_cb_cnt <= 6)
         self.assertEqual(self.my_cb_last, 20)
-        self.assertEqual(s, content)
+        self.assertEqual(s, content.encode("utf-8"))
 
         # no more than 10 times
         # last time always 20 bytes
@@ -329,7 +329,7 @@ class S3KeyTest (unittest.TestCase):
         s = k.get_contents_as_string(cb=callback, num_cb=10)
         self.assertTrue(self.my_cb_cnt <= 10)
         self.assertEqual(self.my_cb_last, 20)
-        self.assertEqual(s, content)
+        self.assertEqual(s, content.encode("utf-8"))
 
         # no more than 1000 times
         # last time always 20 bytes
@@ -348,20 +348,20 @@ class S3KeyTest (unittest.TestCase):
         s = k.get_contents_as_string(cb=callback, num_cb=1000)
         self.assertTrue(self.my_cb_cnt <= 1000)
         self.assertEqual(self.my_cb_last, 20)
-        self.assertEqual(s, content)
+        self.assertEqual(s, content.encode("utf-8"))
 
     def test_website_redirects(self):
         self.bucket.configure_website('index.html')
         key = self.bucket.new_key('redirect-key')
-        self.assertTrue(key.set_redirect('http://www.amazon.com/'))
+        self.assertTrue(key.set_redirect(b'http://www.amazon.com/'))
         self.assertEqual(key.get_redirect(), 'http://www.amazon.com/')
 
-        self.assertTrue(key.set_redirect('http://aws.amazon.com/'))
+        self.assertTrue(key.set_redirect(b'http://aws.amazon.com/'))
         self.assertEqual(key.get_redirect(), 'http://aws.amazon.com/')
 
     def test_website_redirect_none_configured(self):
         key = self.bucket.new_key('redirect-key')
-        key.set_contents_from_string('')
+        key.set_contents_from_string(b'')
         self.assertEqual(key.get_redirect(), None)
 
     def test_website_redirect_with_bad_value(self):
